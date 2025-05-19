@@ -1,3 +1,4 @@
+use egui::PopupCloseBehavior;
 use egui::{
     emath::TSTransform, epaint::TextShape, lerp, pos2, vec2, Align, Align2, Button, Color32,
     CornerRadius, CursorIcon, Frame, Id, Key, LayerId, Layout, NumExt, Order, Rect, Response,
@@ -14,8 +15,6 @@ use crate::{
     utils::{fade_visuals, rect_set_size_centered, rect_stroke_box},
     DockArea, Node, NodeIndex, Style, SurfaceIndex, TabAddAlign, TabIndex, TabStyle, TabViewer,
 };
-
-use crate::popup::popup_under_widget;
 
 impl<Tab> DockArea<'_, Tab> {
     pub(super) fn show_leaf(
@@ -552,9 +551,16 @@ impl<Tab> DockArea<'_, Tab> {
         );
 
         let popup_id = ui.id().with("tab_add_popup");
-        popup_under_widget(ui, popup_id, &response, |ui| {
-            tab_viewer.add_popup(ui, surface_index, node_index);
-        });
+        #[allow(deprecated)]
+        egui::popup_below_widget(
+            ui,
+            popup_id,
+            &response,
+            PopupCloseBehavior::CloseOnClick,
+            |ui| {
+                tab_viewer.add_popup(ui, surface_index, node_index);
+            },
+        );
 
         if response.clicked() {
             if self.show_add_popup {
